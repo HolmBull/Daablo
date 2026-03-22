@@ -21,7 +21,6 @@ const spacing = 80;
 const offset = 50;
 let selected = null;
 let turn = "white";
-
 let board = [];
 
 function createPiece(player, type) {
@@ -50,7 +49,6 @@ function initBoard() {
 function drawBoard(){
   ctx.clearRect(0,0,600,600);
 
-  // tegn linjer (ekte dablo stil)
   for (let y=0;y<size;y++){
     for (let x=0;x<size;x++){
       let px = offset + x*spacing;
@@ -90,8 +88,60 @@ function drawBoard(){
         ctx.lineTo(px-spacing,py+spacing);
         ctx.stroke();
       }
+
+      // tegn brikker
+      const piece = board[y][x];
+      if(piece){
+        ctx.beginPath();
+        ctx.arc(px, py, 20, 0, Math.PI*2);
+        ctx.fillStyle = piece.player === "white" ? "#fff" : "#000";
+        ctx.fill();
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.fillStyle = piece.player === "white" ? "#000" : "#fff";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        let symbol = piece.type === "king" ? "K" : piece.type === "prince" ? "P" : "W";
+        ctx.fillText(symbol, px, py);
+      }
+
+      // marker valgt brikke
+      if(selected && selected.x===x && selected.y===y){
+        ctx.beginPath();
+        ctx.arc(px, py, 25, 0, Math.PI*2);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
     }
   }
 }
 
+canvas.addEventListener("click", e=>{
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.round((e.clientX - rect.left - offset)/spacing);
+  const y = Math.round((e.clientY - rect.top - offset)/spacing);
+
+  if(x<0 || x>=size || y<0 || y>=size) return;
+
+  const piece = board[y][x];
+  if(selected){
+    // flytt brikke
+    board[y][x] = board[selected.y][selected.x];
+    board[selected.y][selected.x] = null;
+    selected = null;
+    turn = turn==="white"?"black":"white";
+  } else if(piece && piece.player===turn){
+    selected = {x,y};
+  }
+
+  drawBoard();
+});
+
+initBoard();
+drawBoard();
+</script>
+</body>
 </html>
