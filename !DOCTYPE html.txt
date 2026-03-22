@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>Dablo (visuell versjon)</title>
+<style>
+  body { font-family: Arial; text-align: center; }
+  canvas { border: 1px solid black; margin-top: 20px; background:#f5deb3; }
+</style>
+</head>
+<body>
+<h1>Dablo – Sør-samisk brettspill</h1>
+<p>Ekte brett + samiske brikker</p>
+<canvas id="board" width="600" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+
+const size = 7;
+const spacing = 80;
+const offset = 50;
+let selected = null;
+let turn = "white";
+
+let board = [];
+
+function createPiece(player, type) {
+  return { player, type };
+}
+
+function initBoard() {
+  for (let y=0;y<size;y++){
+    board[y]=[];
+    for (let x=0;x<size;x++) board[y][x]=null;
+  }
+
+  for (let x=0;x<size;x++){
+    board[0][x]=createPiece("black","warrior");
+    board[1][x]=createPiece("black","warrior");
+    board[5][x]=createPiece("white","warrior");
+    board[6][x]=createPiece("white","warrior");
+  }
+
+  board[0][3]=createPiece("black","king");
+  board[1][3]=createPiece("black","prince");
+  board[6][3]=createPiece("white","king");
+  board[5][3]=createPiece("white","prince");
+}
+
+function drawBoard(){
+  ctx.clearRect(0,0,600,600);
+
+  // tegn linjer (ekte dablo stil)
+  for (let y=0;y<size;y++){
+    for (let x=0;x<size;x++){
+      let px = offset + x*spacing;
+      let py = offset + y*spacing;
+
+      // punkt
+      ctx.beginPath();
+      ctx.arc(px,py,4,0,Math.PI*2);
+      ctx.fill();
+
+      // linjer høyre
+      if (x<size-1){
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(px+spacing,py);
+        ctx.stroke();
+      }
+
+      // linjer ned
+      if (y<size-1){
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(px,py+spacing);
+        ctx.stroke();
+      }
+
+      // diagonaler
+      if (x<size-1 && y<size-1){
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(px+spacing,py+spacing);
+        ctx.stroke();
+      }
+      if (x>0 && y<size-1){
+        ctx.beginPath();
+        ctx.moveTo(px,py);
+        ctx.lineTo(px-spacing,py+spacing);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function drawPieces(){
+  for (let y=0;y<size;y++){
